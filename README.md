@@ -4,7 +4,8 @@
 
 Claudia Paskalia Koesno (2306275355)
 
-# Tugas 7: Elemen Dasar Flutter
+<details>
+<summary> <b> Tugas 7: Elemen Dasar Flutter </b> </summary>
 
 ##  *Stateless widget* dan *stateful widget* serta Perbedaannya
 ### *State*
@@ -213,4 +214,149 @@ Widget build(BuildContext context) {
 Dengan begitu, pembuatan proyek Flutter baru telah selesai. Proyek dapat dijalankan dengan Google Chrome melalui perintah berikut.
 ```dart
 flutter run -d chrome
+```
+
+</details>
+
+# Tugas 8: Flutter Navigation, Layouts, Forms, and Input Elements
+
+## Kegunaan `const` di Flutter
+
+`const` dapat digunakan untuk melakukan deklarasi atas variabel immutable yang nilainya bersifat konstan dan harus sudah diketahui pada saat waktu kompilasi berjalan. Oleh karena itu, nilai dari variabel tersebut harus sudah di berikan secara langsung. 
+
+### Keuntungan Menggunakan `const`
+- **Efisiensi Memori:** Menggunakan `const` memungkinkan Flutter untuk menyimpan nilai dalam satu lokasi memori sehingga mengurangi duplikasi objek.
+- **Pengoptimalan Kinerja:** Kompilator dapat mengoptimalkan kode lebih baik dengan `const` karena dapat mempercepat waktu pemrosesan.
+- **Immutability:** Nilai yang dideklarasikan sebagai `const` tidak bisa diubah, menjaga data tetap konsisten.
+- **Proses Rebuild yang Minimal:** `const` widget tidak akan di-rebuild setiap kali UI diperbarui, mengurangi beban pada proses rendering.
+- **Keamanan Kode:** Dengan `const`, kode lebih aman dari perubahan yang tidak diinginkan, menjaga stabilitas aplikasi.
+
+### Kapan Sebaiknya Menggunakan `const`
+**1. Widget yang Tidak Mengalami Perubahan**
+
+`const` digunakan untuk widget yang tidak akan berubah selama aplikasi berjalan. Contoh yang umum adalah widget teks, ikon, warna, atau kontainer yang memiliki nilai tetap, seperti `const` Text('Hello'), `const` Icon(Icons.home), dan sebagainya.
+
+**2. Objek dengan Nilai Tetap**
+
+`const` baik digunakan ketika kita mendefinisikan nilai konstan, seperti angka atau string yang tidak akan berubah. Hal ini dapat membuat program menghindari pengalokasian memori baru untuk nilai yang sama.
+
+**3. Ketika Ingin Mengoptimalkan Performa**
+
+Jika kita tahu bahwa widget tertentu akan digunakan berulang kali dan widget tersebut tidak mengalami perubahan,  `const` baik digunakan untuk memanfaatkan efisiensi memori dan kinerja.
+
+### Kapan Sebaiknya Tidak Menggunakan `const`
+**1. Widget yang Mengalami Perubahan**
+
+`const` tidak disarankan untuk widget dengan nilai atau properti yang akan berubah seiring waktu. Misalnya, jika kita memiliki widget dengan teks atau gambar yang berubah berdasarkan interaksi pengguna, kita tidak perlu menandainya sebagai `const`.
+
+**2. Widget yang Dihasilkan Secara Dinamis**
+
+Apabila widget atau objek yang dibuat bergantung pada input atau kondisi runtime yang berubah, maka penggunaan `const` tidak tepat. Misalnya, jika widget menggunakan data dari API atau state yang berubah, `const` tidak dapat digunakan.
+
+## Penggunaan *Column* dan *Row* pada Flutter
+*Column* dan *Row* adalah dua layout widget dasar di Flutter yang digunakan untuk mengatur posisi widget lain secara vertikal (dengan *Column*) atau horizontal (dengan *Row*). Keduanya merupakan bagian dari *Flex* widget, yang berarti keduanya bekerja dengan menyesuaikan posisi dan ukuran widget anak-anaknya di sepanjang *main axis* dan *cross axis* dari tata letaknya.
+
+| Pembanding | *Column* | *Row* |
+| -- | -- | -- |
+| Arah Penataan | Vertikal (atas ke bawah) | Horizontal (kiri ke kanan) |
+| *Main Axis* | Vertikal | Horizontal |
+| *Cross Axis* | Horizontal | Vertikal |
+| Kegunaan | Menyusun widget dalam satu kolom | Menyusun widget dalam satu baris |
+| Contoh Penggunaan | Susunan daftar, tampilan layar penuh | Tampilan horizontal, *navbar* |
+
+### Contoh Implementasi *Column*
+```dart
+Column(
+  mainAxisAlignment: MainAxisAlignment.center, // Menyusun widget anak di tengah secara vertikal
+  crossAxisAlignment: CrossAxisAlignment.start, // Menyusun widget anak di sebelah kiri secara horizontal
+  children: <Widget>[
+    Text('Hello!'),
+    Text('This is a Column layout'),
+    Icon(Icons.star, color: Colors.blue),
+  ],
+)
+```
+
+### Contoh Implementasi *Row*
+```dart
+Row(
+  mainAxisAlignment: MainAxisAlignment.spaceAround, // Memberi jarak yang sama antar widget anak
+  crossAxisAlignment: CrossAxisAlignment.center, // Menempatkan widget anak di tengah secara vertikal
+  children: <Widget>[
+    Icon(Icons.home, color: Colors.green),
+    Text('Hello!'),
+    Icon(Icons.settings, color: Colors.red),
+  ],
+)
+```
+
+## Elemen Input pada Flutter
+Elemen input yang saya gunakan pada halaman *form* yang saya buat pada tugas kali ini adalah `TextFormField` saja. Saya menggunakannya untuk seluruh elemen input yakni untuk `name`, `price`, `description`, `category`, dan `rating`. `TextFormField` digunakan untuk menerima input teks dari pengguna dan digunakan dalam formulir yang kompleks atau di dalam widget Form. Hal ini dikarenakan `TextFormField` menyediakan dukungan bawaan untuk melakukan validasi input dan pengelolaan state formulir. Oleh krena itu, elemen input ini ideal digunakan dalam proyek yang saya buat karena diperlukannya validasi input untuk menyimpan data saat form disubmit.
+
+Akan tetapi, masih ada banyak elemen input lainnya pada Flutter yang dapat digunakan untuk mendukung tampilan dan jenis input yang bervariasi. Diantaranya adalah:
+
+- **TextField:** digunakan untuk input berupa teks dan merupakan widget dasar dalam menerima input teks dari pengguna. Berbeda dengan `TextFormField`, elemen input ini tidak mendukung validasi input atau penanganan formulir yang kompleks serta dapat digunakan secara independen tanpa widget `Form`.
+- **Checkbox:** Digunakan untuk input dengan tipe boolean (true/false).
+- **Radio:** Input elemen untuk pengguna memilih satu opsi dari beberapa opsi yang ada.
+- **Switch:** Digunakan sebagai toggle antara dua nilai (biasanya on/off).
+- **Slider:** Input elemen untuk memilih nilai dalam rentang tertentu.
+- **DropdownButton:** Pemilihan opsi satu dari beberapa pilihan yang tersedia di menu dropdown.
+- **DatePicker:** Untuk memilih tanggal.
+- **TimePicker**: Untuk memilih waktu.
+
+## Mengatur tema (theme) dalam Aplikasi Flutter
+Saya mengatur tema atas aplikasi yang saya kembangkan dengan mendefinisikan tema global di dalam file `main.dart` menggunakan `ThemeData`. Saya menetapkan warna utama, warna sekunder, serta warna *background* atau *surface* yang digunakan di aplikasi melalui `ThemeData`. Hal tersebut dilakukan untuk memastikan bahwa semua widget memiliki tampilan warna yang seragam.
+
+Dalam `ThemeData`, atribut-atribut seperti `primaryColor` dan `colorScheme` membantu mengontrol warna untuk berbagai komponen aplikasi. Dengan melakukan pendekatan ini, perubahan yang diterapkan pada `ThemeData` akan otomatis berlaku di seluruh widget aplikasi. Hal ini mempermudah dalam menjaga konsistensi desain.
+
+## Menangani Navigasi dalam Aplikasi dengan Banyak Halaman pada Flutter
+Untuk menangani navigasi dalam aplikasi Flutter dengan banyak halaman, cara yang saya lakukan dalam pengembangan proyek ini adalah dengan menggunakan *nested navigation* dan memanfaatkan `Navigator` serta `MaterialPageRoute` untuk memudahkan perpindahan antar halaman.
+
+Widget `Navigator` bekerja dengan menampilkan halaman-halaman yang ada pada layar seakan sebagai sebuah tumpukan (*stack*). Saat melakukan navigasi ke sebuah halaman baru, kita dapat mengakses `Navigator` melalui `BuildContext` dan memanggil fungsi yang ada, seperti `push()`, `pop()`, serta `pushReplacement()`.
+
+Method `push()` digunakan untuk melakukan penambahan suatu route ke dalam stack route yang dikelola oleh `Navigator` dan menyebabkan route yang ditambahkan akan berada pada posisi paling atas stack, sehingga route yang baru saja ditambahkan tersebut akan muncul dan ditampilkan kepada pengguna.
+
+Pemanggilan method `pop()` akan menghapus route yang sedang ditampilkan kepada pengguna (route yang berada pada paling atas stack) dari stack route yang dikelola oleh `Navigator`. Aplikasi akan berpindah dari route yang sedang ditampilkan kepada pengguna ke route yang berada di bawahnya pada stack yang dikelola `Navigator`.
+
+Method `pushReplacement()` digunakan untuk menghapus route yang sedang ditampilkan kepada pengguna dan menggantinya dengan suatu route. Method ini menyebabkan aplikasi untuk berpindah dari route yang sedang ditampilkan kepada pengguna ke suatu route yang diberikan. Pada stack route yang dikelola `Navigator`, route lama pada atas stack akan digantikan secara langsung oleh route baru yang diberikan tanpa mengubah kondisi elemen stack yang berada di bawahnya.
+
+Dengan menggunakan `MaterialPageRoute`, kita dapat menentukan halaman tujuan dan mengatur transisi antar halaman dengan cara yang sederhana. Sebagai contoh, ketika pengguna mengklik tombol atau elemen lainnya, kita dapat memanggil `Navigator.push()` untuk membuka halaman baru, dan di halaman baru itu, kita bisa menambahkan elemen navigasi seperti tombol kembali menggunakan `Navigator.pop()`.
+
+## Implementasi Tugas
+### Membuat Product Card
+Membuat berkas `product_card.dart` pada direktori `lib\widgets` untuk memindahkan widget `ItemHomepage` dan `ItemCard` yang sebelumnya terdapat pada `menu.dart`. Hal ini sebagai bentuk dari *refactoring* agar kode lebih modular, lebih mudah dipelihara, dan memungkinkan penggunaan kembali widget tersebut di berbagai tempat dalam aplikasi.
+
+### Membuat Halaman Formulir
+Saya membuat berkas baru yaitu `productentry_form.dart` di dalam folder `lib/screens`. Dalam berkas tersebut saya melakukan penambahan kode yang berfungsi untuk membuat halaman form sehingga pengguna dapat memasukkan data produk, seperti nama, harga, deskripsi, stok, kategori, dan rating. Setiap input memiliki validasi, seperti harga dan stok harus angka dan tidak boleh negatif. Setelah form diisi dan tombol "Save" ditekan, data yang dimasukkan akan ditampilkan dalam dialog sebagai konfirmasi, dan form akan direset jika semua validasi berhasil. Form ini juga dapat di-scroll agar tampilan tetap rapi di berbagai ukuran layar.
+
+Pada halaman utama, ketika tombol `Tambah Produk` ditekan, pengguna akan diarahkan ke halaman form dengan menambahkan kode pada fungsi `onTap()` pada berkas `lib/widgets/product_card.dart`.
+```dart
+...
+onTap: () {
+  ...
+  // Navigate ke route yang sesuai (tergantung jenis tombol)
+  if (item.name == "Tambah Produk") {
+    Navigator.push(context,
+    MaterialPageRoute(builder: (context) => const ProductEntryFormPage()));
+  }
+},
+...
+```
+
+### Menambahkan Drawer
+Membuat berkas baru `left_drawer.dart` pada folder `lib/widgets`. Saya menambahkan kode yang digunakan untuk menambahkan drawer di aplikasi Flutter dengan dua item menu. Drawer header menampilkan judul "Bare Lab" dan tagline "Your Journey to Healthier Skin Starts Here!" dengan desain warna utama aplikasi berdasarkan warna tema yang telah dikonfigurasikan pada berkas `main.dart`. Menu pertama, `Halaman Utama` akan mengarahkan pengguna ke halaman utama (`MyHomePage`) saat ditekan, sementara menu kedua yaitu `Tambah Item` mengarahkan pengguna ke halaman form untuk menambah produk (`ProductEntryFormPage`). Kedua menu menggunakan `Navigator.pushReplacement` untuk mengganti halaman yang aktif. Setelah itu drawer ditambahkan baik pada berkas `menu.dart` dan `productentry_form.dart` pada direktori `lib\screens`.
+
+```dart
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+        ...
+        // Mengganti warna icon drawer menjadi putih
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+    // Masukkan drawer sebagai parameter nilai drawer dari widget Scaffold
+    drawer: const LeftDrawer(),
+    ...
+  );
+}
 ```
