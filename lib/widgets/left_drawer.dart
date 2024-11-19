@@ -1,3 +1,4 @@
+import 'package:bare_lab/screens/list_product.dart';
 import 'package:flutter/material.dart';
 import 'package:bare_lab/screens/menu.dart';
 import 'package:bare_lab/screens/productentry_form.dart';
@@ -51,9 +52,10 @@ class LeftDrawer extends StatelessWidget {
                     ));
               },
             ),
+
             ListTile(
               leading: const Icon(Icons.add_box_outlined),
-              title: const Text('Tambah Item'),
+              title: const Text('Tambah Produk'),
               // Bagian redirection ke ProductEntryFormPage
               onTap: () {
                 Navigator.pushReplacement(
@@ -63,6 +65,18 @@ class LeftDrawer extends StatelessWidget {
                     ));
               },
             ),
+
+            ListTile(
+              leading: const Icon(Icons.list),
+              title: const Text('Daftar Produk'),
+              onTap: () {
+                  // Route menu ke halaman tambah produk
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ProductEntryPage()),
+                  );
+              },
+          ),
         ],
       ),
     );

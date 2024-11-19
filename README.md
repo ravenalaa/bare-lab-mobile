@@ -218,7 +218,8 @@ flutter run -d chrome
 
 </details>
 
-# Tugas 8: Flutter Navigation, Layouts, Forms, and Input Elements
+<details>
+<summary> <b> Tugas 8: Flutter Navigation, Layouts, Forms, and Input Elements </b> </summary>
 
 ## Kegunaan `const` di Flutter
 
@@ -358,5 +359,246 @@ Widget build(BuildContext context) {
     drawer: const LeftDrawer(),
     ...
   );
+}
+```
+</details>
+
+# Tugas 9: Integrasi Layanan Web Django dengan Aplikasi Flutter
+
+## Pengambilan dan Pengiriman Data JSON dengan Model
+
+**Mengapa kita perlu membuat model untuk melakukan pengambilan ataupun pengiriman data JSON?**
+
+Pembuatan model pada Flutter merupakan langkah yang fundamental dalam mengorganisir dan mengelola data user dalam aplikasi. Pendifinisian struktur data yang jelas dapat memudahkan dalam melakukan pemeliharaan kode serta mendukung *readability* dan *reusability* kode. Membuat model kustom juga membuat developer untuk menentukan aturan dalam memanipulasi data dalm suatu struktur data dalam aplikasi, serta mempermudah validasi tipe data untuk memperkecil kemungkinan terjadinya error yang sulit dilacak.
+
+**Apakah akan terjadi error jika kita tidak membuat model terlebih dahulu?**
+
+Tidak, tidak akan terjadi error. Kita dapat melakukan pengambilan data JSON tanpa membuat model terlebih dahulu. Kita dapat melakukan pengambilan data dari berbagai sumber seperti dari suatu API dengan menggunakan dependensi `http` untuk melakukan *request* ke API tersebut yang menyediakan data dalam format JSON. Selain itu dapat pula data JSON diambil melalui berkas lokal dalam bentuk `.json` yang disertakan pada aplikasi Flutter. Hal ini disebut dengan "parsing" atau pembacaan dan pengambilan data yang kemudian akan dilakukan "deserialisasi". 
+
+## Fungsi dari Library `http` dalam Flutter
+
+Library `http` dalam tugas ini digunakan untuk melakukan pengambilan data eksternal dari luar aplikasi untuk kemudian digunakan dalam aplikasi proyek ini. Dengan kata lain, library ini digunakan untuk melakukan *fetching* data dan bertukar HTTP *request*  pada aplikasi. Selain digunakan untuk mengambil data, HTTP *request* juga memungkinkan aplikasi untuk melakukan interaksi dengan server dalam mengirimkan data. Operasi seperti GET, POST, PUT, DELETE, dan berbagai jenis request lainnya dapat dilakukan ke API. Library `http` juga digunakan untuk menangani respons yang biasanya berupa data dalam JSON, XML, atau format lainnya yang kemudian dapat diproses oleh aplikasi. 
+
+## Fungsi dari CookieRequest dan Mengapa *instance* CookieRequest Perlu untuk Dibagikan ke Semua Komponen di Aplikasi Flutter
+
+CookieRequest merupakan library yang tersedia pada package `pbp_django_auth` yang digunakan untuk menangani autentikasi berbasis cookies dalam aplikasi Flutter dengan integrasi Django sebagai backend. CookieRequest menyediakan fungsi untuk melakukan inisialisasi session, login, dan logout sehingga aplikasi dapat melacak status login dan sesi pengguna. Selain itu, CookieRequest juga memfasilitasi pengiriman HTTP *request* seperti `GET` dan `POST` dengan membawa cookie yang diperlukan backend Django untuk kemudian memverifikasi bahwa pengguna yang melakukan permintaan telah terautentikasi.
+
+CookieRequest perlu dibagikan kepada seluruh komponen di aplikasi Flutter karena hal tersebut dapat memberikan akses yang **konsisten** atas data cookie (status login) pada seluruh komponen. Setiap komponen akan berinteraksi secara terpusat sehingga hal ini dapat meningkatkan efisiensi pengelolaan cookie serta memastikan konsistensi data di seluruh bagian aplikasi. Dengan kata lain, membagikan *instance* CookieRequest yang sama memastikan bahwa setiap permintaan HTTP oleh aplikasi membawa cookie yang sama tanpa perlunya dilakukan konfigurasi ulang setiap kali aplikasi melakukan permintaan.
+
+## Mekanisme Pengiriman Data JSON
+1. **Membuat model sesuai dengan data pada JSON**
+
+Membuat model yang sesuai dengan model backend yang digunakan pada saat pembuatan proyek Django sebelumnya pada direktori models dengan memanfaatkan website [Quicktype](https://app.quicktype.io/) berdasarkan data JSON yang didapat dari *endpoint* /json pada tugas Django.
+
+2. **Menambahkan dependensi HTTP**
+
+Menambahkan package `http` dan menambahkan `<uses-permission android:name="android.permission.INTERNET" />` pada `android/app/src/main/AndroidManifest.xml` untuk memperbolehkan akses internet pada aplikasi.
+
+3. **Melakukan integrasi form Flutter dengan layanan Django**
+
+Membuat sebuah fungsi view baru pada `main/views.py` aplikasi Django untuk melakukan `POST` atas objek baru yang datanya disesuaikan dengan atribut model yang telah didefinisikan sebelumnya. Selanjutnya menambahkan path baru pada `main/urls.py` untuk melakukan routing atas URL untuk melakukan pemanggilan fungsi pembuatan objek baru.
+
+Pada berkas form di aplikasi Flutter, membuat perintah pada `onPressed: ()` sebagai berikut:
+
+```dart
+onPressed: () async {
+    if (_formKey.currentState!.validate()) {
+        // Kirim ke Django dan tunggu respons
+        // TODO: Ganti URL dan jangan lupa tambahkan trailing slash (/) di akhir URL!
+        final response = await request.postJson(
+            "http://[URL_APP_KAMU]/create-flutter/",
+            jsonEncode(<String, String>{
+                'mood': _mood,
+                'mood_intensity': _moodIntensity.toString(),
+                'feelings': _feelings,
+            // TODO: Sesuaikan field data sesuai dengan aplikasimu
+            }),
+        );
+        ...
+    }
+}
+
+```
+
+Kode tersebut digunakan untuk mengirimkan data yang berisi berbagai data atribut produk ke server menggunakan permintaan HTTP POST dengan format JSON. Setelah permintaan dikirim, aplikasi akan menunggu respons dan melanjutkan eksekusi berdasarkan respons yang diterima. `async` digunakan untuk menandai bahwa fungsi tersebut adalah fungsi asinkron. Fungsi ini akan menjalankan operasi yang mungkin memerlukan waktu (seperti mengirim permintaan HTTP, membaca file, atau mengambil data dari database) tanpa memblokir eksekusi program secara keseluruhan.
+
+## Mekanisme Autentikasi dari Login, Register, hingga Logout
+
+### Login
+1. Pengguna memasukkan informasi akun seperti `username` dan `password` melalui antarmuka pengguna pada laman `LoginPage`.
+2. Apabila tombol login ditekan dan fungsi login pada `CookieRequest` terpanggil yang mengirimkan HTTP request dengan endpoint URL proyek Django.
+3.  Django menggunakan sistem autentikasi bawaan atau pustaka pihak ketiga seperti Django Rest Framework untuk memverifikasi kredensial pengguna melalui fungsi *views* pada berkas `authentication/views.py`.
+4. Jika autentikasi berhasil, server Django menghasilkan token akses yang dikirim kembali ke aplikasi Flutter. Aplikasi Flutter kemudian menyimpan token ini secara lokal untuk digunakan dalam permintaan berikutnya.
+5. Jika `request.loggedIn`, pengguna akan diarahkan ke `MyHomePage` dan muncul tampilan selamat datang dengan menggunakan SnackBar.
+
+### Register
+1. Pengguna memasukkan informasi pendaftaran melalui antarmuka pengguna pada laman `RegisterPage`. Formulir pendaftaran mencakup input untuk data username dan password.
+2. Ketika tombol register ditekan, fungsi pendaftaran pada aplikasi Flutter dipanggil. Fungsi ini akan mengirimkan permintaan HTTP POST ke server Django dengan data username dan password yang sebelumny atelah diinput pengguna.
+3. Django menerima permintaan pendaftaran dan memverifikasi data pengguna melalui fungsi *views* `register` yang ada pada berkas `authentication/views.py`.
+4. Aplikasi Flutter menerima respons dari server. Jika pendaftaran berhasil, Django akan menyimpan data pengguna baru di database dan menampilkan pesan sukses menggunakan SnackBar, serta mengarahkan pengguna ke halaman `loginPage`. Jika pendaftaran gagal, aplikasi Flutter akan menampilkan pesan untuk memberi tahu pengguna bahwa proses pendaftaran gagal.
+
+### Logout
+1. Pengguna menekan tombol logout yang terletak di halaman `MyHomePage`. Tombol ini memicu pemanggilan fungsi logout dalam aplikasi Flutter.
+2. Fungsi logout ini akan menghapus token akses yang disimpan sebelumnya di aplikasi Flutter. Token yang disimpan di perangkat digunakan untuk autentikasi pada permintaan HTTP berikutnya. Menghapus token ini memastikan bahwa pengguna keluar dari aplikasi.
+3. Setelah logout, aplikasi Flutter akan mengarahkan pengguna kembali ke halaman login (`LoginPage`) dan menampilkan pesan dengan menggunakan SnackBar untuk memberi tahu pengguna bahwa mereka telah berhasil keluar.
+4. Aplikasi akan kembali ke kondisi seperti sebelum pengguna melakukan login. Semua data yang terkait dengan sesi pengguna sebelumnya dihapus.
+
+## Implementasi Tugas
+### Membuat Halaman Login
+
+Perlu dilakukannya beberapa persiapan yaitu dengan meninstall beberapa dependensi baru untuk melakukan persiapan atas pengintegrasian Web Service Django dengan aplikasi Flutter. Berikut beberapa hal yang disiapkan:
+
+- Membuat aplikasi `authentication` dan juga meng-install library `corsheaders` pada proyek Django.
+- Membuat fungsi `login` pada `views.py` pada aplikasi Django tersebut untuk menangani proses autentikasi login.
+- Melakukan instalasi package `provider` dan `pbp_django_auth` dan modifikasi root widget untuk menyediakan instance CookieRequest dengan semua komponen pada proyek di dalam file `main.dart`.
+- Membuat `login.dart` pada berkas baru `lib/screens/login.dart` dan diisi untuk menampilkan halaman login seperti yang sudah diajarkan di Tutorial 8.
+
+### Mengimplementasikan Fitur Registrasi Akun dan Integrasi Autentikasi
+
+- Menambahkan fungsi `register` pada `authentication/views.py` untuk melakukan registrasi akun dengan melakukan `POST` serta melakukan beberapa validasi.
+- Membuat berkas baru pada folder `screens` dengan nama `register.dart`.
+- Pada berkas tersebut  input untuk username, password, dan konfirmasi password, yang dikirim ke server melalui API menggunakan metode `postJson` untuk membuat akun baru. Jika respons dari server berhasil, pengguna akan diarahkan ke halaman `loginPage`, sedangkan jika gagal, pesan error akan ditampilkan melalui SnackBar.
+
+### Membuat Model Kustom
+
+Melalui website [Quicktype](https://app.quicktype.io/), kita dapat langsung membuat model yang disesuaikan dengan data JSON yang kita input. Data JSON diambil dari *endpoint* JSON sebelumnya yang telah dibuat saat pengerjaan proyek Django. Setelah mendapatkan kode model melalui Quicktype, pada aplikasi Flutter, buat direktori baru yaitu direktori `models` yang merupakan sub-direktori dari folder `lib`. Selanjutnya, membuat berkas `product_entry.dart` dan pada berkas tersebut menempel kode yang sebelumnya telah disalin pada Quicktype.
+
+### Membuat Halaman Daftar Produk
+
+Daftar produk akan ditampilkan melalui file `lib/screens/list_product.dart`. Aakan dilakukan mekanisme fetch data, implementasi fungsi asinkronus dan mengirim permintaan HTTP. Proses fetch data pada kode di atas dimulai dengan memanggil fungsi `fetchProduct` yang mengirimkan permintaan HTTP `GET` menggunakan package `pbp_django_auth` untuk mendapatkan data dari URL API. Data yang diterima dalam bentuk JSON kemudian akan diubah menjadi daftar objek Product melalui iterasi dan konversi menggunakan metode `fromJson`. Data ini selanjutnya ditampilkan pada tampilan `ListView` menggunakan widget `FutureBuilder`, yang menunggu data secara asinkron dan menampilkan elemen daftar berdasarkan hasil fetch. Ketika fungsi `fetchProduct()` dipanggil dan telah selesai melakukan proses, maka `snapshot` akan berisi `listProduct` yang di-*return* pada fungsi tersebut. Setelah itu,`snapshot.data` akan diolah untuk ditampilkan pada `ListView.builder`.
+
+### Membuat Halaman Detail Produk
+
+Ketika salah satu card produk diklik pada daftar produk, maka pengguna akan diarahkan ke halaman detail produk tersebut. Berikut adalah routing dari halaman daftar produk ke detail produk pada `list_product.dart`.
+
+```dart
+onTap: () {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => DetailPage(product: snapshot.data![index]),
+    ),
+  );
+},
+```
+Membuat berkas `product_detail.dart` dan menambahkan kode untuk mendefinsikan halaman detail produk dengan menampilkan informasi seluruh atribut model seperti nama, harga, deskripsi, kategori, stok, dan rating produk yang diambil dari objek Product. Kemudian menambahkan pula tombol kembali untuk dapat kembali ke halaman `ProductEntryPage`. Dilakukan penambahan kode sebagai berikut.
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:bare_lab/models/product_entry.dart';
+
+class DetailPage extends StatelessWidget {
+  final Product product;
+
+  const DetailPage({super.key, required this.product});
+
+  @override
+  Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    return Scaffold(
+      appBar: AppBar(
+        ...
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Container(
+          width: screenWidth,
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            ...
+          ),
+
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                product.fields.name,
+                style: const TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                "Price: Rp${product.fields.price}",
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                "Description: ${product.fields.description}",
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                "Category: ${product.fields.category}",
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                "Stock: ${product.fields.stock}",
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                "Rating: ${product.fields.rating}",
+                style: const TextStyle(fontSize: 16),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+```
+
+### Filter pada Halaman Daftar Item
+
+Backend Django akan menyaring data berdasarkan pengguna yang sedang login menggunakan mekanisme `request.user` pada setiap fungsiyang terdapat pada `views.py` proyek Django milik kita. Hal ini memastikan bahwa hanya data milik pengguna terkait yang dikembalikan ke Flutter. Selain itu pada aplikasi Flutter dilakukan pula autentikasi dengan `CookieRequest`. Filter ini secara otomatis bekerja karena library `pbp_django_auth` akan menyertakan cookie autentikasi dalam setiap permintaan API. Dengan cara ini, backend mengetahui pengguna yang sedang login dan hanya mengembalikan data yang relevan. Implementasi tersebut dapat dilihat dalam potongan kode berikut pada berkas `list_product.dart`:
+
+```dart
+...
+class _ProductEntryPageState extends State<ProductEntryPage> {
+  Future<List<Product>> fetchProduct(CookieRequest request) async {
+    // Menggunakan LOCAL HOST
+    final response = await request.get('http://localhost:8000/json/');
+    
+    // Melakukan decode response menjadi bentuk json
+    var data = response;
+    
+    // Melakukan konversi data json menjadi object ProductEntry
+    List<Product> listProduct = [];
+    for (var d in data) {
+      if (d != null) {
+        listProduct.add(Product.fromJson(d));
+      }
+    }
+    return listProduct;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    /* Variabel request yang berupa objek CookieRequest untuk mengelola
+    autentikasi berbasis cookie, seperti mengirimkan permintaan HTTP yang
+    secara otomatis menyertakan cookie autentikasi. */
+
+    final request = context.watch<CookieRequest>();
+    return Scaffold(
+      appBar: AppBar(
+        ...
+      ),
+      drawer: const LeftDrawer(),
+      body: FutureBuilder(
+        future: fetchProduct(request),
+        builder: (context, AsyncSnapshot snapshot) {
+          ...
+        },
+      ),
+    );
+  }
 }
 ```
